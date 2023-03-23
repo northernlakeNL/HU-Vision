@@ -26,15 +26,16 @@ def load(path):
 
 train_img = np.array([load('smoke\\train\\' + filename) for filename in train_data['filename']])
 train_bound = train_data[['xmin', 'ymin', 'xmax', 'ymax']].values
-train_labels = train_data['class'].map({'smoke':1, 'no_smoke':0}).values
+train_labels = train_data['class'].map({'smoke':0, 'no_smoke':1}).values
 
 test_img = np.array([load('smoke\\test\\' + filename) for filename in test_data['filename']])
 test_bound = test_data[['xmin', 'ymin', 'xmax', 'ymax']].values
-test_labels = test_data['class'].map({'smoke':1, 'no_smoke':0}).values
+test_labels = test_data['class'].map({'smoke':0, 'no_smoke':1}).values
 
 valid_img  = np.array([load('smoke\\valid\\' + filename) for filename in valid_data['filename']])
 valid_bound = valid_data[['xmin', 'ymin', 'xmax', 'ymax']].values
-valid_labels = valid_data['class'].map({'smoke':1, 'no_smoke':0}).values
+valid_labels = valid_data['class'].map({'smoke':0, 'no_smoke':1}).values
+
 
 train_cls = to_categorical(train_labels, 2)
 test_cls = to_categorical(test_labels, 2)
@@ -69,8 +70,6 @@ lossWeights = {
     "bounding_box" : 1.0
 }
 
-print(trainTargets)
-
 opt = Adam()
 
 vgg = VGG16(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
@@ -95,19 +94,17 @@ model.compile(loss= losses, optimizer=opt,metrics=["accuracy"], loss_weights=los
 train_labels = train_labels.astype('float32')
 val_labels = valid_labels.astype('float32')
 
-model.fit(train_img, trainTargets, epochs = 10, validation_data=(valid_img, validTargets))
+model.fit(train_img, trainTargets, epochs = 5, validation_data=(valid_img, validTargets))
 
-test_loss, test_acc = model.evaluate(test_img, test_labels,verbose=2)
-print('Test loss:', test_loss)
-print('Test accuracy:', test_acc)
+res = model.evaluate({'input_1': test_img}, testTargets, verbose=2)
+print('Test loss:', res[0])
+print('Test accuracy:', res[1])
 
-predictions = model.predict(test_img[:10])
+classPred, boundPred = model.predict(np.expand_dims(test_img, axis=0))
 
-fig, axs = plt.subplots(2,5,figsize=(15,6))
-fig.subplots_adjust(hspace = .2, wspace=.001)
-axs = axs.ravel()
-for i in range(10):
-    axs[i].imshow(test_img[i])
-    axs[i].axis('off')
+xmin, xmax, ymin, ymax = boundPred[0]
 
-plt.show()
+imgWBox = cv2.rectangle(test_img, (int(xmin*width), int(ymin*height)), (int(xmax*width), int(ymax*height)), (255,0,0), 2)
+
+cv2.imshow('smoke', imgWBox)
+cv2.waitKey(0)
