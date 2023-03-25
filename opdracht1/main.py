@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 from PIL import Image
 
-
 # annotaties inladen met panda
 test_data = pd.read_csv("smoke\\test\\_annotations.csv")
 train_data = pd.read_csv("smoke\\train\\_annotations.csv")
@@ -25,7 +24,6 @@ width = 224
 #de originele waardes voor hoogte en breedte
 og_height = 480
 og_width = 640
-
 
 #laden van de foto's en ze gelijk resizen
 def load(path):
@@ -128,7 +126,7 @@ train_labels = train_labels.astype('float32')
 val_labels = valid_labels.astype('float32')
 
 #model trainen
-model.fit(train_img, trainTargets, epochs = 1, validation_data=(test_img, testTargets))
+model.fit(train_img, trainTargets, epochs = 50, validation_data=(test_img, testTargets))
 
 #model evalueren
 res = model.evaluate(test_img, testTargets)
