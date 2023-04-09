@@ -16,12 +16,10 @@ train_data = pd.read_csv("smoke\\train\\_annotations.csv")
 valid_data = pd.read_csv("smoke\\valid\\_annotations.csv")
 
 #zet de resize waardes voor hoogte en breedte
-height = 224
-width = 224
+height, width = 224, 224
 
 #de originele waardes voor hoogte en breedte
-og_height = 480
-og_width = 640
+og_height, og_width = 480, 640
 
 #laden van de foto's en ze gelijk resizen
 def load(path):
