@@ -1,16 +1,14 @@
 import pandas as pd
 import cv2
 import numpy as np
-import os
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, Input
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Flatten, Dense, Dropout, Input
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.utils import to_categorical
 import matplotlib.pyplot as plt
 from matplotlib import patches
-from PIL import Image
 
 # annotaties inladen met panda
 test_data = pd.read_csv("smoke\\test\\_annotations.csv")
@@ -97,7 +95,6 @@ lossWeights = {
     "bounding_box" : 1.0
 }
 
-
 #VGG model laden en flatten
 vgg = VGG16(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
 vgg.trainable = False
@@ -126,18 +123,18 @@ train_labels = train_labels.astype('float32')
 val_labels = valid_labels.astype('float32')
 
 #model trainen
-model.fit(train_img, trainTargets, epochs = 50, validation_data=(test_img, testTargets))
+model.fit(train_img, trainTargets, epochs = 25, validation_data=(valid_img, validTargets))
 
 #model evalueren
-res = model.evaluate(test_img, testTargets)
+res1 = model.evaluate(valid_img, validTargets)
 
 #predictions maken voor de nieuwe images
-predLab, predBox = model.predict(valid_img)
+predLab, predBox = model.predict(test_img)
 
 #laten zien van de data
-for i in range(len(valid_img)):
+for i in range(len(test_img)):
     fig, ax = plt.subplots()
-    img = valid_img[i]
+    img = test_img[i]
     img = normalize(img)
     label = np.argmax(predLab, axis=-1)
     ax.imshow(img)
